@@ -1,0 +1,53 @@
+version: "3"
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: server-app
+    container_name: server-app
+    command: npm run start
+    ports:
+      - 8000:8000
+    volumes:
+      - ./server:/usr/src/app
+    depends_on:
+      - mongo
+    environment:
+      - NODE_ENV=development
+    networks:
+      - node-network
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - data:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - node-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: app-client
+    container_name: app-client
+    ports:
+      - 3000:3000
+    volumes:
+      - ./client:/usr/app
+    command: npm run start
+    depends_on:
+      - server
+    networks:
+      - node-network
+
+networks:
+  node-network:
+    driver: bridge
+
+volumes:
+  data:
+  node_modules:
